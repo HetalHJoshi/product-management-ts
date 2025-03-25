@@ -1,6 +1,14 @@
+import $ from "jquery";
 import { Product } from "./types";
 import { loadProducts, saveProducts } from "./storage";
 import { showSuccessModal } from "./modal";
+
+// Extend jQuery to support Bootstrap's modal()
+declare global {
+  interface JQuery {
+    modal(action: string): JQuery;
+  }
+}
 
 let products: Product[] = [];
 let deleteProductId: string | null = null;
@@ -124,27 +132,22 @@ function renderProductCards(): void {
   });
 }
 
-// Trigger delete confirmation modal
 function confirmDelete(productId: string): void {
   deleteProductId = productId;
-  // @ts-ignore: jQuery assumed to be available globally
   $("#deleteConfirmModal").modal("show");
 }
 
-// Handle deletion confirmation
 function handleDelete(): void {
   if (deleteProductId) {
     products = products.filter((product) => product.id !== deleteProductId);
     saveProducts(products);
     renderProductCards();
-    // @ts-ignore
     $("#deleteConfirmModal").modal("hide");
     showSuccessModal("Product deleted successfully!");
     deleteProductId = null;
   }
 }
 
-// Clear all filters and re-render
 function clearFilters(): void {
   (document.getElementById("filterId") as HTMLInputElement).value = "";
   (document.getElementById("filterName") as HTMLInputElement).value = "";
@@ -155,6 +158,5 @@ function clearFilters(): void {
   renderProductCards();
 }
 
-// Make functions globally accessible if referenced in HTML
 (window as any).clearFilters = clearFilters;
 (window as any).confirmDelete = confirmDelete;
